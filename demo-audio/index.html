@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Demo - WebRTC</title>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .camera {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <audio src="en-js.ogg" autobuffer>
+    </audio>
+    <button id="play">Play</button>
+    <button id="pause">Pause</button>
+    <script>
+        (function() {
+          var audio = null;
+
+          function startup() {
+            // create audio context
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            audio = document.querySelector('audio');
+
+            //TODO: something with audio context
+            var source = audioCtx.createMediaElementSource(audio);
+          }
+
+          document.getElementById("play").addEventListener('click', function(ev) {
+              audio.play();
+              console.log(audio);
+              ev.preventDefault();
+          }, false);
+
+          document.getElementById("pause").addEventListener('click', function(ev) {
+              audio.pause();
+              ev.preventDefault();
+          }, false);
+
+          window.addEventListener('load', startup, false);
+        })();
+    </script>
+</body>
+
+</html>

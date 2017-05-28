@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Ble location</title>
+  </head>
+  <body>
+    <form>
+      <button>Gather devices</button>
+    </form>
+    <div id="log"></div>
+    <script>
+    function log(data) {
+      const content = document.createTextNode(data);
+      document.getElementById('log').appendChild(content);
+    }
+
+    function onButtonClick() {
+      let options = {};
+      //options.acceptAllDevices = true;
+      options.filters = [{services: ['battery_service']}];
+
+      log('Requesting Bluetooth Device...');
+      log('with ' + JSON.stringify(options));
+      navigator.bluetooth.requestDevice(options)
+      .then(device => {
+        log('> Name:             ' + device.name);
+        log('> Id:               ' + device.id);
+        log('> Connected:        ' + device.gatt.connected);
+        console.log(device);
+
+        device.watchAdvertisements();
+        device.addEventListener('advertisementreceived', () => {
+          console.log(arguments);
+        });
+
+        // Attempts to connect to remote GATT Server.
+        device.addEventListener('gattserverdisconnected', () => {
+          console.log('device disconnected!');
+        });
+
+        return device.gatt.connect();
+      })
+      .then(server => server.getPrimaryService('battery_service'))
+      .then(service => service.getCharacteristic('battery_level'))
+      .then(characteristic => characteristic.startNotifications())
+      .then(characteristic => {
+        // Set up event listener for when characteristic value changes.
+        characteristic.addEventListener('characteristicvaluechanged', (event) => { console.log(event); });
+        // Reading Battery Level...
+        return characteristic.readValue();
+      })
+      .catch(error => { console.log(error); });
+    }
+    </script>
+    <script>
+      document.querySelector('form').addEventListener('submit', function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        onButtonClick();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Device Orientation</title>
+  </head>
+  <body>
+    <div id="log">
+    </div>
+    <script>
+      function log(data) {
+        document.getElementById('log').innerText = data;
+      }
+
+      function startup() {
+          window.addEventListener('deviceorientation', function(event) {
+            log(event.absolute + ' ' + Math.floor(event.alpha) + ' : ' + Math.floor(event.beta) + ' : ' + Math.floor(event.gamma) );
+          });
+      }
+      window.addEventListener('load', startup, false);
+    </script>
+  </body>
+</html>

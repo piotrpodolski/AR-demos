@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Demo - WebRTC</title>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .camera {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="camera">
+        <video id="video">Video stream not available.</video>
+        <div class="menu">
+          <button id="fullscreen">Fullscreen toggle</button>
+          <button id="blur">Blur</button>
+          <button id="invert">Invert</button>
+          <button id="grayscale">Grayscale</button>
+          <button id="none">None</button>
+        </div>
+    </div>
+    <script>
+        (function() {
+            // fullscreen polyfill
+            var elem = document.documentElement;
+            if (!elem.requestFullscreen) {
+                elem.requestFullscreen = elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen || function() {
+                    console.log('fullscreen not supported');
+                }
+            }
+
+            if (typeof(document.fullscreenElement === undefined)) {
+              //TODO: refactor this :P
+              document.isFullscreen = function() {
+                return document.webkitFullscreenElement ||
+                       document.mozFullScreenElement ||
+                       document.msFullscreenElement ||
+                       (function() {
+                           console.log('fullscreen not supported');
+                           return false;
+                       })()
+              };
+            }
+
+            document.exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+
+            function toggleFullscreen() {
+                console.log(document.isFullscreen());
+                if (document.isFullscreen()) {
+                  document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen();
+                }
+            }
+
+            function startup() {
+                navigator.getMedia = (navigator.getUserMedia ||
+                    navigator.webkitGetUserMedia ||
+                    navigator.mozGetUserMedia ||
+                    navigator.msGetUserMedia);
+                var video = document.getElementById('video');
+
+                var width = 320; // We will scale the photo width to this
+                var height = 0; // This will be computed based on the input stream
+
+                var streaming = false;
+
+                video.addEventListener('canplay', function(ev) {
+                    if (!streaming) {
+                        height = video.videoHeight / (video.videoWidth / width);
+
+                        video.setAttribute('width', width);
+                        video.setAttribute('height', height);
+                        streaming = true;
+                    }
+                }, false);
+
+                navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(function(err) {
+                        console.log("An error occured! " + err);
+                    });
+
+                document.getElementById('fullscreen').addEventListener('click', function(ev) {
+                    toggleFullscreen();
+                    ev.preventDefault();
+                }, false);
+
+                //TODO: this is dirty 
+                document.getElementById('blur').addEventListener('click', function(ev) {
+                    video.style.filter = "blur(5px)";
+                    ev.preventDefault();
+                }, false);
+
+                document.getElementById('invert').addEventListener('click', function(ev) {
+                    video.style.filter = "invert(100%)";
+                    ev.preventDefault();
+                }, false);
+
+                document.getElementById('grayscale').addEventListener('click', function(ev) {
+                    video.style.filter = "grayscale(100%)";
+                    ev.preventDefault();
+                }, false);
+
+                document.getElementById('none').addEventListener('click', function(ev) {
+                    video.style.filter = null;
+                    ev.preventDefault();
+                }, false);
+            }
+
+            window.addEventListener('load', startup, false);
+        })();
+    </script>
+</body>
+
+</html>
