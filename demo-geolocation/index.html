@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Device Orientation</title>
+  </head>
+  <body>
+    <div id="log">
+    </div>
+    <script>
+      function log(data) {
+        document.getElementById('log').innerText = data;
+      }
+
+      function startup() {
+        if ("geolocation" in navigator) {
+          var watchID = navigator.geolocation.watchPosition(function(position) {
+            log(position.coords.latitude + ' ' + position.coords.longitude);
+          });
+        } else {
+          log('Navigation not supported :(');
+        }
+      }
+      window.addEventListener('load', startup, false);
+    </script>
+  </body>
+</html>
